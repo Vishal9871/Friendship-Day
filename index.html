@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="friend.jpg">
+    <title>Friendship Day Celebration</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            background: #1a1a2e;
+            overflow: hidden;
+            color: #fff;
+        }
+        
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        
+        #friendshipForm {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        input {
+            display: block;
+            width: 200px;
+            margin: 10px auto;
+            padding: 10px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 25px;
+            color: #fff;
+            text-align: center;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
+        }
+        
+        #message {
+            margin-top: 20px;
+            font-size: 1.5em;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 100px;
+            height: 125px;
+            transition: all 3s ease-in-out;
+        }
+
+        #bracelet {
+            position: absolute;
+            width: 200px;
+            bottom: -200px;
+            transition: all 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    
+    <div class="container">
+        <h1>Celebrate Friendship Day!</h1>
+        <div id="friendshipForm">
+            <input type="text" id="name1" placeholder="Your Name">
+            <input type="text" id="name2" placeholder="Friend's Name">
+            <button onclick="celebrateFriendship()">Celebrate!</button>
+        </div>
+        <div id="message"></div>
+    </div>
+
+    <img id="bracelet" src="friends.png" alt="Friendship Bracelet">
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 5 + 1;
+                this.speedX = Math.random() * 3 - 1.5;
+                this.speedY = Math.random() * 3 - 1.5;
+                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.size > 0.1) this.size -= 0.1;
+
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height || this.size <= 0.1) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 100; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        createParticles();
+        animate();
+
+        function celebrateFriendship() {
+            const name1 = document.getElementById('name1').value;
+            const name2 = document.getElementById('name2').value;
+
+            if (!name1 || !name2) {
+                alert("Please enter both names!");
+                return;
+            }
+
+            document.getElementById('friendshipForm').style.display = 'none';
+            
+            const message = document.getElementById('message');
+            message.innerHTML = `${name1} & ${name2}<br>Friends Forever!`;
+            message.style.opacity = '1';
+
+            document.querySelector('h1').style.opacity = '1';
+            document.querySelector('h1').style.transform = 'translateY(0)';
+
+            // Create heart-shaped particles
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    createHeart(Math.random() * width, Math.random() * height);
+                }, i * 100);
+            }
+
+            // Add balloons
+            for (let i = 0; i < 5; i++) {
+                createBalloon();
+            }
+
+            // Show friendship bracelet
+            const bracelet = document.getElementById('bracelet');
+            bracelet.style.bottom = '20px';
+        }
+
+        function createHeart(x, y) {
+            const size = Math.random() * 20 + 10;
+            const color = `hsl(${Math.random() * 60 + 300}, 100%, 50%)`;
+            
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.bezierCurveTo(x - size / 2, y - size / 2, x - size, y + size / 3, x, y + size);
+            ctx.bezierCurveTo(x + size, y + size / 3, x + size / 2, y - size / 2, x, y);
+            ctx.fill();
+        }
+
+        function createBalloon() {
+            const balloon = document.createElement('img');
+            balloon.src = 'ballon.png';
+            balloon.classList.add('balloon');
+            balloon.style.left = `${Math.random() * (width - 100)}px`;
+            balloon.style.bottom = '-125px';
+            document.body.appendChild(balloon);
+
+            setTimeout(() => {
+                balloon.style.bottom = `${height + 125}px`;
+            }, 100);
+
+            setTimeout(() => {
+                balloon.remove();
+            }, 3100);
+        }
+    </script>
+</body>
+</html>
